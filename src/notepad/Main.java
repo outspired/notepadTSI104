@@ -1,19 +1,20 @@
 package notepad;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.InputMismatchException;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class Main {
     public final static String DATE_FORMAT = "dd.MM.yyyy";
     public final static DateTimeFormatter DATE_FORMATTER
             = DateTimeFormatter.ofPattern(DATE_FORMAT);
+    public final static String TIME_FORMAT = "HH:mm";
+    public final static DateTimeFormatter TIME_FORMATTER
+            = DateTimeFormatter.ofPattern(TIME_FORMAT);
 
     private static Scanner scanner = new Scanner(System.in);
-    private static List<Record> recordList = new ArrayList<>();
+    private static Map<Integer, Record> recordList = new LinkedHashMap<>();
 
     public static void main(String[] args) {
         while (true) {
@@ -32,6 +33,10 @@ public class Main {
                 case "cr":
                     createReminder();
                     break;
+                case "createalarm":
+                case "ca":
+                    createAlarm();
+                    break;
                 case "list":
                     printList();
                     break;
@@ -40,6 +45,9 @@ public class Main {
                     break;
                 case "find":
                     find();
+                    break;
+                case "show":
+                    showById();
                     break;
                 case "help":
                     showHelp();
@@ -52,6 +60,18 @@ public class Main {
         }
     }
 
+    private static void createAlarm() {
+        var alarm = new Alarm();
+        addRecord(alarm);
+    }
+
+    private static void showById() {
+        System.out.println("Enter an ID");
+        int id = askInt();
+        Record record = recordList.get(id);
+        System.out.println(record);
+    }
+
     private static void createReminder() {
         var reminder = new Reminder();
         addRecord(reminder);
@@ -60,7 +80,7 @@ public class Main {
     private static void find() {
         System.out.println("Find what?");
         String str = askString();
-        for (Record r : recordList) {
+        for (Record r : recordList.values()) {
             if (r.hasSubstring(str)) {
                 System.out.println(r);
             }
@@ -82,13 +102,7 @@ public class Main {
     private static void removeById() {
         System.out.println("Enter ID to remove:");
         int id = askInt();
-        for (int i = 0; i < recordList.size(); i++) {
-            Record p = recordList.get(i);
-            if (id == p.getId()) {
-                recordList.remove(i);
-                break;
-            }
-        }
+        recordList.remove(id);
     }
 
     private static int askInt() {
@@ -104,7 +118,7 @@ public class Main {
 
 
     private static void printList() {
-        for (Record p : recordList) {
+        for (Record p : recordList.values()) {
             System.out.println(p);
         }
     }
@@ -116,7 +130,7 @@ public class Main {
 
     private static void addRecord(Record p) {
         p.askQuestions();
-        recordList.add(p);
+        recordList.put(p.getId(), p);
         System.out.println("You have created this record:");
         System.out.println(p);
     }
@@ -166,5 +180,11 @@ public class Main {
         String d = askString();
         LocalDate date = LocalDate.parse(d, DATE_FORMATTER);
         return date;
+    }
+
+    public static LocalTime askTime() {
+        String t = askString();
+        LocalTime time = LocalTime.parse(t, TIME_FORMATTER);
+        return time;
     }
 }
